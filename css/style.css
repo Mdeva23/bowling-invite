@@ -1,557 +1,153 @@
-/* =========================================================================
-   DESIGN TOKENS
-   A retro neon bowling-alley meets romantic-purple palette.
-   ========================================================================= */
 :root {
   --bg-deep: #150826;
   --bg-mid: #241041;
-  --bg-mid-2: #2f1457;
   --purple-primary: #7b2ff7;
   --purple-light: #b98eff;
-  --pink-accent: #ff6fd8;
-  --gold-glow: #ffd166;
+  --pink: #ff6fd8;
+  --gold: #ffd166;
   --cream: #f7f0ff;
-  --pin-white: #fffaf5;
+  --white: #fffaf5;
 
   --font-display: 'Righteous', cursive;
   --font-script: 'Parisienne', cursive;
   --font-body: 'Quicksand', sans-serif;
 
-  --radius-lg: 28px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
-
-  --shadow-glow: 0 0 25px rgba(185, 142, 255, 0.45);
+  --shadow: 0 0 25px rgba(185,142,255,0.4);
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-}
+/* ================= BASE ================= */
+* { box-sizing: border-box; }
 
 body {
+  margin: 0;
   font-family: var(--font-body);
+  background: radial-gradient(circle at top, #2f1457, var(--bg-deep));
   color: var(--cream);
-  background: radial-gradient(circle at 20% 10%, var(--bg-mid-2), var(--bg-deep) 60%);
   overflow-x: hidden;
-  min-height: 100vh;
-  position: relative;
 }
 
-/* Respect users who prefer reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
-}
-
-/* =========================================================================
-   AMBIENT BACKGROUND SPARKLES / HEARTS (generated via JS)
-   ========================================================================= */
-.ambient-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.ambient-item {
-  position: absolute;
-  bottom: -10%;
-  opacity: 0.55;
-  animation: float-up linear infinite;
-  filter: drop-shadow(0 0 6px rgba(185, 142, 255, 0.5));
-}
-
-@keyframes float-up {
-  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-  10%  { opacity: 0.6; }
-  90%  { opacity: 0.5; }
-  100% { transform: translateY(-115vh) translateX(20px) rotate(25deg); opacity: 0; }
-}
-
-/* =========================================================================
-   APP / SCREEN LAYOUT
-   ========================================================================= */
+/* ================= SCREENS ================= */
 #app {
-  position: relative;
-  z-index: 1;
   min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 24px 16px 56px;
+  align-items: center;
 }
 
 .screen {
   display: none;
   width: 100%;
-  max-width: 640px;
+  max-width: 650px;
   text-align: center;
-  flex-direction: column;
-  align-items: center;
-  animation: screen-in 0.6s ease forwards;
+  padding: 24px;
 }
 
 .screen.active {
-  display: flex;
-}
-
-@keyframes screen-in {
-  from { opacity: 0; transform: translateY(18px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* =========================================================================
-   SCREEN 1 — INVITE
-   ========================================================================= */
-.lane-glow {
-  position: absolute;
-  top: -120px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 480px;
-  height: 480px;
-  background: radial-gradient(circle, rgba(123, 47, 247, 0.35), transparent 70%);
-  filter: blur(10px);
-  z-index: -1;
-}
-
-.neon-sign {
-  margin-top: 12px;
-  padding: 18px 22px;
-  border: 3px solid var(--purple-light);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 0 12px var(--purple-light), 0 0 40px rgba(123, 47, 247, 0.5) inset;
-  background: rgba(21, 8, 38, 0.4);
-}
-
-.neon-text {
-  font-family: var(--font-display);
-  font-size: clamp(1.7rem, 5.5vw, 2.6rem);
-  line-height: 1.35;
-  margin: 0;
-  color: var(--pin-white);
-  text-shadow:
-    0 0 6px var(--purple-light),
-    0 0 18px var(--purple-primary),
-    0 0 36px var(--purple-primary);
-  animation: flicker 3.2s infinite ease-in-out;
-}
-
-.neon-text span {
   display: block;
 }
 
-.neon-highlight {
-  color: var(--pink-accent);
-  text-shadow:
-    0 0 8px var(--pink-accent),
-    0 0 22px var(--pink-accent),
-    0 0 44px var(--purple-primary);
-}
-
-@keyframes flicker {
-  0%, 19%, 21%, 23%, 54%, 56%, 100% { opacity: 1; }
-  20%, 22%, 55% { opacity: 0.72; }
-}
-
-.bowling-scene {
-  position: relative;
-  width: 100%;
-  max-width: 320px;
-  height: 90px;
-  margin: 22px auto 6px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.pins {
-  display: flex;
-  gap: 10px;
-  font-size: 2.1rem;
-  animation: pin-wobble 2.6s ease-in-out infinite;
-}
-
-.pin:nth-child(2) { animation: pin-wobble 2.6s ease-in-out infinite 0.15s; }
-.pin:nth-child(3) { animation: pin-wobble 2.6s ease-in-out infinite 0.3s; }
-
-@keyframes pin-wobble {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-4deg); }
-}
-
-.ball {
-  position: absolute;
-  left: -60px;
-  bottom: 6px;
-  font-size: 2.2rem;
-  animation: roll-in 3.4s ease-in-out infinite;
-}
-
-@keyframes roll-in {
-  0%   { left: -60px; transform: rotate(0deg); }
-  55%  { left: 46%; transform: rotate(360deg); }
-  70%  { left: 46%; transform: rotate(380deg) scale(1.05); }
-  100% { left: -60px; transform: rotate(0deg); }
-}
-
-.cute-subtext {
-  font-family: var(--font-script);
-  font-size: 1.35rem;
-  color: var(--purple-light);
-  max-width: 380px;
-  margin: 14px auto 8px;
-}
-
-.button-row {
-  position: relative;
-  display: flex;
-  gap: 18px;
-  justify-content: center;
-  align-items: center;
-  margin-top: 22px;
-  flex-wrap: wrap;
-  min-height: 64px;
-}
-
+/* ================= BUTTONS ================= */
 .btn {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 1.05rem;
-  padding: 15px 30px;
-  border-radius: 999px;
   border: none;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-weight: 700;
+  transition: 0.2s;
 }
 
 .btn-yes {
-  background: linear-gradient(135deg, var(--purple-primary), var(--pink-accent));
-  color: var(--pin-white);
-  box-shadow: var(--shadow-glow);
-}
-
-.btn-yes:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 0 32px var(--pink-accent);
+  background: linear-gradient(135deg, var(--purple-primary), var(--pink));
+  color: white;
+  box-shadow: var(--shadow);
 }
 
 .btn-no {
   background: transparent;
-  color: var(--purple-light);
   border: 2px solid var(--purple-light);
-  /* Fixed positioning is toggled on via JS once the dodge starts */
-  transition: top 0.28s ease, left 0.28s ease, transform 0.18s ease;
+  color: var(--purple-light);
+  position: relative;
 }
 
 .btn-no.dodging {
   position: fixed;
-  z-index: 20;
+  z-index: 9999;
 }
 
-.taunt-text {
-  font-family: var(--font-script);
-  font-size: 1.2rem;
-  color: var(--gold-glow);
-  min-height: 1.6em;
-  margin-top: 16px;
-}
-
-/* =========================================================================
-   SCREEN 2 — DATE PICKER
-   ========================================================================= */
-.section-title {
+/* ================= INVITE ================= */
+.neon-text {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 4.5vw, 2rem);
-  color: var(--pin-white);
-  text-shadow: 0 0 16px var(--purple-primary);
-  margin-bottom: 6px;
+  font-size: 2.2rem;
+  text-shadow: 0 0 20px var(--purple-primary);
 }
 
-.section-subtitle {
-  font-family: var(--font-script);
-  font-size: 1.2rem;
-  color: var(--purple-light);
-  margin-top: 0;
-  margin-bottom: 20px;
+.neon-highlight {
+  color: var(--pink);
 }
 
-.picker-card {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(185, 142, 255, 0.35);
-  border-radius: var(--radius-lg);
-  padding: 22px;
-  backdrop-filter: blur(6px);
-  box-shadow: var(--shadow-glow);
-}
-
-/* Calendar */
-.calendar-header {
+.button-row {
+  margin-top: 20px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+  gap: 14px;
+  justify-content: center;
 }
 
-.cal-nav {
-  background: rgba(123, 47, 247, 0.25);
-  border: 1px solid var(--purple-light);
-  color: var(--pin-white);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.cal-nav:hover:not(:disabled) {
-  background: rgba(123, 47, 247, 0.55);
-}
-
-.cal-nav:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.cal-month-label {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  color: var(--pin-white);
-}
-
-.calendar-weekdays,
-.calendar-grid {
+/* ================= CALENDAR ================= */
+.calendar-grid,
+.calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
 }
 
-.calendar-weekdays {
-  font-size: 0.75rem;
-  color: var(--purple-light);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
 .cal-day {
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 10px;
   border-radius: 50%;
-  font-size: 0.9rem;
-  cursor: pointer;
-  border: 1px solid transparent;
-  color: var(--cream);
+  border: none;
   background: transparent;
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-
-.cal-day:hover:not(.disabled):not(.empty) {
-  background: rgba(255, 111, 216, 0.25);
+  color: var(--cream);
+  cursor: pointer;
 }
 
 .cal-day.selected {
-  background: linear-gradient(135deg, var(--purple-primary), var(--pink-accent));
-  color: var(--pin-white);
-  font-weight: 700;
-  box-shadow: 0 0 14px var(--pink-accent);
-  transform: scale(1.06);
-}
-
-.cal-day.today {
-  border-color: var(--gold-glow);
+  background: var(--pink);
 }
 
 .cal-day.disabled {
-  opacity: 0.25;
-  cursor: not-allowed;
+  opacity: 0.3;
+  pointer-events: none;
 }
 
-.cal-day.empty {
-  cursor: default;
-}
-
-/* Time picker */
-.time-picker {
-  margin-top: 24px;
-  text-align: left;
-}
-
-.time-title {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--purple-light);
-  margin: 0 0 10px;
-}
-
-.time-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
+/* ================= TIME ================= */
 .pill {
-  font-family: var(--font-body);
-  font-weight: 600;
-  padding: 9px 16px;
+  padding: 8px 14px;
   border-radius: 999px;
-  border: 1.5px solid var(--purple-light);
+  border: 1px solid var(--purple-light);
   background: transparent;
   color: var(--cream);
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
-
-.pill:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 111, 216, 0.18);
 }
 
 .pill.selected {
-  background: linear-gradient(135deg, var(--purple-primary), var(--pink-accent));
-  border-color: transparent;
-  color: var(--pin-white);
-  box-shadow: 0 0 12px var(--pink-accent);
+  background: var(--purple-primary);
 }
 
-.custom-time {
-  margin-top: 12px;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  padding: 9px 14px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--purple-light);
-  background: rgba(21, 8, 38, 0.5);
-  color: var(--cream);
-}
-
+/* ================= UTIL ================= */
 .hidden {
-  display: none !important;
+  display: none;
 }
 
-/* Note */
-.note-wrap {
-  margin-top: 22px;
-  text-align: left;
-}
-
-.note-wrap textarea {
-  width: 100%;
-  margin-top: 8px;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid rgba(185, 142, 255, 0.4);
-  background: rgba(21, 8, 38, 0.4);
-  color: var(--cream);
-  resize: vertical;
-}
-
-.selection-summary {
-  font-family: var(--font-script);
-  font-size: 1.15rem;
-  color: var(--gold-glow);
-  min-height: 1.6em;
-  margin: 18px 0 4px;
-}
-
-.btn-submit {
-  width: 100%;
-  margin-top: 6px;
-}
-
-.btn-submit:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.send-status {
-  font-size: 0.9rem;
-  color: var(--purple-light);
-  min-height: 1.4em;
-  margin-top: 10px;
-}
-
-/* =========================================================================
-   SCREEN 3 — THANK YOU
-   ========================================================================= */
-.thankyou-glow {
-  position: absolute;
-  top: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(circle, rgba(255, 111, 216, 0.35), transparent 70%);
-  filter: blur(10px);
-  z-index: -1;
-}
-
-.thankyou-details {
-  font-family: var(--font-script);
-  font-size: 1.5rem;
-  color: var(--purple-light);
-  max-width: 420px;
-}
-
-.thankyou-note {
-  font-size: 1rem;
-  color: var(--cream);
-  opacity: 0.85;
-}
-
-.thankyou-emojis {
-  margin-top: 18px;
-  font-size: 1.6rem;
-  letter-spacing: 6px;
-  animation: pin-wobble 3s ease-in-out infinite;
-}
-
-/* =========================================================================
-   CONFETTI CANVAS
-   ========================================================================= */
+/* ================= CONFETTI ================= */
 #confetti-canvas {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 50;
 }
 
-/* =========================================================================
-   RESPONSIVE
-   ========================================================================= */
-@media (max-width: 480px) {
-  .neon-sign {
-    padding: 14px 16px;
-  }
-
-  .button-row {
-    gap: 14px;
-  }
-
-  .btn {
-    padding: 13px 24px;
-    font-size: 0.95rem;
-  }
-
-  .picker-card {
-    padding: 16px;
-  }
+/* ================= THANK YOU ================= */
+.thankyou-glow {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--pink), transparent);
+  margin: auto;
+  filter: blur(20px);
 }

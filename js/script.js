@@ -1,14 +1,8 @@
-/* =========================================================================
-   CONFIGURATION
-   Fill these in with your own EmailJS values (see README.md for setup).
-   Until you do, the site still works end-to-end — it just won't actually
-   email you, and will log the selection to the browser console instead.
-   ========================================================================= */
 const CONFIG = {
-  EMAILJS_PUBLIC_KEY: "YOUR_PUBLIC_KEY",   // EmailJS "Public Key" (Account > API Keys)
-  EMAILJS_SERVICE_ID: "YOUR_SERVICE_ID",   // EmailJS Email Service ID
-  EMAILJS_TEMPLATE_ID: "YOUR_TEMPLATE_ID", // EmailJS Email Template ID
-  RECIPIENT_NAME: "David",                 // Shown in the confirmation email, if your template uses it
+  EMAILJS_PUBLIC_KEY: "YOUR_PUBLIC_KEY",
+  EMAILJS_SERVICE_ID: "YOUR_SERVICE_ID",
+  EMAILJS_TEMPLATE_ID: "YOUR_TEMPLATE_ID",
+  RECIPIENT_NAME: "David",
 };
 
 const isEmailJsConfigured =
@@ -20,20 +14,17 @@ if (isEmailJsConfigured && window.emailjs) {
   emailjs.init({ publicKey: CONFIG.EMAILJS_PUBLIC_KEY });
 }
 
-/* =========================================================================
-   SMALL HELPERS
-   ========================================================================= */
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+/* ================= HELPERS ================= */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 function showScreen(id) {
   $$(".screen").forEach((el) => el.classList.remove("active"));
-  $(`#${id}`).classList.add("active");
+  const target = $(`#${id}`);
+  if (target) target.classList.add("active");
 }
 
-/* =========================================================================
-   AMBIENT FLOATING HEARTS / SPARKLES (background decoration)
-   ========================================================================= */
+/* ================= AMBIENT ================= */
 function startAmbientLayer() {
   const layer = $("#ambient-layer");
   const symbols = ["💜", "✨", "🎳", "💫"];
@@ -44,405 +35,309 @@ function startAmbientLayer() {
     item.textContent = symbols[Math.floor(Math.random() * symbols.length)];
     item.style.left = `${Math.random() * 100}vw`;
     item.style.fontSize = `${12 + Math.random() * 16}px`;
-    const duration = 8 + Math.random() * 10;
-    item.style.animationDuration = `${duration}s`;
+    item.style.animationDuration = `${8 + Math.random() * 10}s`;
     layer.appendChild(item);
-    setTimeout(() => item.remove(), duration * 1000);
+    setTimeout(() => item.remove(), 12000);
   }
 
-  // Seed a few immediately, then keep a steady trickle going.
-  for (let i = 0; i < 6; i++) setTimeout(spawn, i * 700);
   setInterval(spawn, 1400);
 }
 
-/* =========================================================================
-   SCREEN 1 — THE PLAYFUL "NO" BUTTON
-   ========================================================================= */
+/* ================= SCREEN 1 ================= */
 function initInviteScreen() {
   const noBtn = $("#no-btn");
   const yesBtn = $("#yes-btn");
   const taunt = $("#taunt-text");
-  const buttonRow = $(".button-row");
 
   const taunts = [
     "nice try 😏",
     "not happening, cutie",
-    "the ball says yes 🔮",
-    "you can't catch this button",
-    "come on, you know you want to",
-    "the pins are ready and waiting 🎳",
+    "you can't escape this 🎳",
+    "the pins demand YES",
     "I'll just keep moving 💨",
   ];
 
-  const subtexts = [
-    "no pressure... but I already booked the lane in my heart 💜",
-    "there's only one right answer here 👀",
-    "psst, click yes, the pins are waiting",
-    "I promise to let you win at least once 😉",
-  ];
-
   let dodgeCount = 0;
-  let subtextIndex = 0;
-
-  function cycleSubtext() {
-    subtextIndex = (subtextIndex + 1) % subtexts.length;
-    $("#cute-subtext").textContent = subtexts[subtextIndex];
-  }
-  setInterval(cycleSubtext, 4200);
 
   function moveNoButton() {
-    // Once "dodging", the button becomes fixed-position so it can roam
-    // the whole viewport rather than being confined to the button row.
     if (!noBtn.classList.contains("dodging")) {
       noBtn.classList.add("dodging");
     }
 
-    const btnWidth = noBtn.offsetWidth || 100;
-    const btnHeight = noBtn.offsetHeight || 50;
-    const padding = 24;
+    const rect = noBtn.getBoundingClientRect();
 
-    const maxX = window.innerWidth - btnWidth - padding;
-    const maxY = window.innerHeight - btnHeight - padding;
+    const padding = 20;
+    const maxX = window.innerWidth - rect.width - padding;
+    const maxY = window.innerHeight - rect.height - padding;
 
-    const newX = Math.max(padding, Math.random() * maxX);
-    const newY = Math.max(padding, Math.random() * maxY);
+    const x = padding + Math.random() * (maxX - padding);
+    const y = padding + Math.random() * (maxY - padding);
 
-    noBtn.style.left = `${newX}px`;
-    noBtn.style.top = `${newY}px`;
+    noBtn.style.left = `${x}px`;
+    noBtn.style.top = `${y}px`;
 
-    dodgeCount += 1;
+    dodgeCount++;
     taunt.textContent = taunts[Math.floor(Math.random() * taunts.length)];
 
-    // After enough teasing, let the "No" button shrink a little each time —
-    // purely playful, it never actually disappears or breaks the layout.
-    const scale = Math.max(0.72, 1 - dodgeCount * 0.02);
+    const scale = Math.max(0.7, 1 - dodgeCount * 0.02);
     noBtn.style.transform = `scale(${scale})`;
   }
 
-  // Desktop: dodge on hover/mouse approach.
-  noBtn.addEventListener("mouseenter", moveNoButton);
-
-  // Mobile: there's no hover, so dodge on touchstart (fires before the
-  // click), and prevent the click from ever registering as a real tap.
-  noBtn.addEventListener(
-    "touchstart",
-    (e) => {
+  ["mouseenter", "touchstart", "click"].forEach((evt) => {
+    noBtn.addEventListener(evt, (e) => {
       e.preventDefault();
       moveNoButton();
-    },
-    { passive: false }
-  );
-
-  // Safety net: if a click ever does land, still don't let it "succeed" —
-  // just dodge again with a cheeky message.
-  noBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    moveNoButton();
-  });
-
-  // If the window resizes while the button is off dodging, keep it on-screen.
-  window.addEventListener("resize", () => {
-    if (noBtn.classList.contains("dodging")) {
-      const rect = noBtn.getBoundingClientRect();
-      const maxX = window.innerWidth - rect.width - 16;
-      const maxY = window.innerHeight - rect.height - 16;
-      noBtn.style.left = `${Math.min(rect.left, Math.max(16, maxX))}px`;
-      noBtn.style.top = `${Math.min(rect.top, Math.max(16, maxY))}px`;
-    }
+    });
   });
 
   yesBtn.addEventListener("click", () => {
     burstConfetti();
-    setTimeout(() => {
-      showScreen("confirm-screen");
-    }, 500);
+    setTimeout(() => showScreen("confirm-screen"), 400);
+  });
+
+  window.addEventListener("resize", () => {
+    if (!noBtn.classList.contains("dodging")) return;
+
+    const rect = noBtn.getBoundingClientRect();
+    noBtn.style.left = `${Math.min(rect.left, window.innerWidth - rect.width - 20)}px`;
+    noBtn.style.top = `${Math.min(rect.top, window.innerHeight - rect.height - 20)}px`;
   });
 }
 
-/* =========================================================================
-   SCREEN 2 — CALENDAR + TIME PICKER
-   ========================================================================= */
+/* ================= CALENDAR ================= */
 const dateState = {
   viewYear: null,
-  viewMonth: null, // 0-indexed
-  selectedDate: null, // Date object
-  selectedTime: null, // string label, e.g. "4:30 PM"
+  viewMonth: null,
+  selectedDate: null,
+  selectedTime: null,
 };
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+const MONTHS = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
 ];
-const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
-// How far into the future she's allowed to pick a date.
-const MAX_DAYS_AHEAD = 90;
+const MAX_DAYS = 90;
 
 function initCalendar() {
   const today = new Date();
   dateState.viewYear = today.getFullYear();
   dateState.viewMonth = today.getMonth();
 
-  const weekdaysEl = $("#cal-weekdays");
-  weekdaysEl.innerHTML = WEEKDAY_LABELS.map((d) => `<span>${d}</span>`).join("");
-
-  $("#cal-prev").addEventListener("click", () => changeMonth(-1));
-  $("#cal-next").addEventListener("click", () => changeMonth(1));
+  $("#cal-prev").onclick = () => changeMonth(-1);
+  $("#cal-next").onclick = () => changeMonth(1);
 
   renderCalendar();
 }
 
-function changeMonth(delta) {
-  dateState.viewMonth += delta;
+function changeMonth(d) {
+  dateState.viewMonth += d;
   if (dateState.viewMonth < 0) {
     dateState.viewMonth = 11;
-    dateState.viewYear -= 1;
-  } else if (dateState.viewMonth > 11) {
+    dateState.viewYear--;
+  }
+  if (dateState.viewMonth > 11) {
     dateState.viewMonth = 0;
-    dateState.viewYear += 1;
+    dateState.viewYear++;
   }
   renderCalendar();
 }
 
 function renderCalendar() {
-  const { viewYear, viewMonth } = dateState;
-  $("#cal-month-label").textContent = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const maxDate = new Date(today);
-  maxDate.setDate(maxDate.getDate() + MAX_DAYS_AHEAD);
-
-  const firstOfMonth = new Date(viewYear, viewMonth, 1);
-  const startWeekday = firstOfMonth.getDay();
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-
   const grid = $("#cal-grid");
   grid.innerHTML = "";
 
-  // Leading empty cells so day 1 lands on the correct weekday column.
-  for (let i = 0; i < startWeekday; i++) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const max = new Date(today);
+  max.setDate(max.getDate() + MAX_DAYS);
+
+  const first = new Date(dateState.viewYear, dateState.viewMonth, 1);
+  const start = first.getDay();
+  const days = new Date(dateState.viewYear, dateState.viewMonth + 1, 0).getDate();
+
+  $("#cal-month-label").textContent =
+    `${MONTHS[dateState.viewMonth]} ${dateState.viewYear}`;
+
+  for (let i = 0; i < start; i++) {
     const empty = document.createElement("span");
     empty.className = "cal-day empty";
     grid.appendChild(empty);
   }
 
-  for (let day = 1; day <= daysInMonth; day++) {
-    const cellDate = new Date(viewYear, viewMonth, day);
-    const cell = document.createElement("button");
-    cell.type = "button";
-    cell.className = "cal-day";
-    cell.textContent = day;
+  for (let d = 1; d <= days; d++) {
+    const date = new Date(dateState.viewYear, dateState.viewMonth, d);
+    const btn = document.createElement("button");
 
-    const isPast = cellDate < today;
-    const isTooFar = cellDate > maxDate;
-    const isToday = cellDate.getTime() === today.getTime();
-    const isSelected =
-      dateState.selectedDate &&
-      cellDate.getTime() === dateState.selectedDate.getTime();
+    btn.className = "cal-day";
+    btn.textContent = d;
 
-    if (isToday) cell.classList.add("today");
-    if (isSelected) cell.classList.add("selected");
+    const isPast = date < today;
+    const isFutureLimit = date > max;
 
-    if (isPast || isTooFar) {
-      cell.classList.add("disabled");
-      cell.disabled = true;
+    if (isPast || isFutureLimit) {
+      btn.disabled = true;
+      btn.classList.add("disabled");
     } else {
-      cell.addEventListener("click", () => {
-        dateState.selectedDate = cellDate;
+      btn.onclick = () => {
+        dateState.selectedDate = date;
         renderCalendar();
-        updateSelectionSummary();
-      });
+        updateSummary();
+      };
     }
 
-    grid.appendChild(cell);
+    if (dateState.selectedDate &&
+        date.toDateString() === dateState.selectedDate.toDateString()) {
+      btn.classList.add("selected");
+    }
+
+    grid.appendChild(btn);
   }
 
-  // Disable "previous month" once we're back at the current month.
-  const isAtCurrentMonth =
-    viewYear === today.getFullYear() && viewMonth === today.getMonth();
-  $("#cal-prev").disabled = isAtCurrentMonth;
+  $("#cal-prev").disabled =
+    dateState.viewYear === today.getFullYear() &&
+    dateState.viewMonth === today.getMonth();
 }
 
+/* ================= TIME ================= */
 function initTimePicker() {
   const pills = $$(".pill");
-  const customInput = $("#custom-time");
+  const custom = $("#custom-time");
 
-  pills.forEach((pill) => {
-    pill.addEventListener("click", () => {
-      pills.forEach((p) => p.classList.remove("selected"));
-      pill.classList.add("selected");
+  pills.forEach(p => {
+    p.onclick = () => {
+      pills.forEach(x => x.classList.remove("selected"));
+      p.classList.add("selected");
 
-      if (pill.dataset.time === "other") {
-        customInput.classList.remove("hidden");
-        customInput.focus();
-        dateState.selectedTime = null; // wait for the custom input
+      if (p.dataset.time === "other") {
+        custom.classList.remove("hidden");
+        dateState.selectedTime = null;
       } else {
-        customInput.classList.add("hidden");
-        dateState.selectedTime = pill.dataset.time;
+        custom.classList.add("hidden");
+        dateState.selectedTime = p.dataset.time;
       }
-      updateSelectionSummary();
-    });
+
+      updateSummary();
+    };
   });
 
-  customInput.addEventListener("input", () => {
-    if (customInput.value) {
-      const [hours, minutes] = customInput.value.split(":").map(Number);
-      const period = hours >= 12 ? "PM" : "AM";
-      const displayHour = ((hours + 11) % 12) + 1;
-      dateState.selectedTime = `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
-    } else {
-      dateState.selectedTime = null;
-    }
-    updateSelectionSummary();
-  });
+  custom.oninput = () => {
+    if (!custom.value) return;
+
+    let [h,m] = custom.value.split(":").map(Number);
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = ((h + 11) % 12) + 1;
+
+    dateState.selectedTime = `${h}:${String(m).padStart(2,"0")} ${ampm}`;
+    updateSummary();
+  };
 }
 
-function updateSelectionSummary() {
-  const summary = $("#selection-summary");
-  const submitBtn = $("#submit-btn");
+function updateSummary() {
+  const el = $("#selection-summary");
+  const btn = $("#submit-btn");
 
   if (dateState.selectedDate && dateState.selectedTime) {
-    const formatted = dateState.selectedDate.toLocaleDateString(undefined, {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-    summary.textContent = `${formatted} at ${dateState.selectedTime} — perfect 💜`;
-    submitBtn.disabled = false;
-  } else if (dateState.selectedDate) {
-    summary.textContent = "Now just pick a time...";
-    submitBtn.disabled = true;
+    el.textContent = "Perfect 💜 ready to lock it in";
+    btn.disabled = false;
   } else {
-    summary.textContent = "";
-    submitBtn.disabled = true;
+    el.textContent = "";
+    btn.disabled = true;
   }
 }
 
-/* =========================================================================
-   SUBMIT — SEND THE SELECTION (EmailJS, no backend required)
-   ========================================================================= */
+/* ================= SUBMIT ================= */
 function initSubmit() {
-  $("#submit-btn").addEventListener("click", async () => {
-    if (!dateState.selectedDate || !dateState.selectedTime) return;
+  $("#submit-btn").onclick = async () => {
+    const status = $("#send-status");
+    const btn = $("#submit-btn");
 
-    const submitBtn = $("#submit-btn");
-    const statusEl = $("#send-status");
-    const note = $("#note").value.trim();
-
-    const formattedDate = dateState.selectedDate.toLocaleDateString(undefined, {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Sending... 💌";
-    statusEl.textContent = "";
+    btn.disabled = true;
+    btn.textContent = "Sending...";
 
     const payload = {
       to_name: CONFIG.RECIPIENT_NAME,
-      chosen_date: formattedDate,
-      chosen_time: dateState.selectedTime,
-      note: note || "(no note left)",
+      date: dateState.selectedDate.toDateString(),
+      time: dateState.selectedTime,
+      note: $("#note").value || "(none)",
     };
 
     try {
       if (isEmailJsConfigured && window.emailjs) {
-        await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, payload);
+        await emailjs.send(
+          CONFIG.EMAILJS_SERVICE_ID,
+          CONFIG.EMAILJS_TEMPLATE_ID,
+          payload
+        );
       } else {
-        // EmailJS isn't configured yet — log so you can still see it worked
-        // during local testing, and let the person know gently.
-        console.info("[Bowling Invite] EmailJS is not configured yet. Selection was:", payload);
-        statusEl.textContent = "(Demo mode: email not sent — see README to enable sending.)";
+        console.log("Demo payload:", payload);
       }
 
-      showThankYou(formattedDate);
-    } catch (err) {
-      console.error("EmailJS send failed:", err);
-      statusEl.textContent = "Hmm, that didn't send. Mind trying again in a moment?";
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Confirm Our Date 💜";
+      showScreen("thankyou-screen");
+      $("#thankyou-details").textContent =
+        `${payload.date} at ${payload.time}`;
+      burstConfetti();
+
+    } catch (e) {
+      status.textContent = "Try again 💜";
+      btn.disabled = false;
+      btn.textContent = "Confirm Our Date 💜";
     }
-  });
+  };
 }
 
-function showThankYou(formattedDate) {
-  $("#thankyou-details").textContent = `${formattedDate} at ${dateState.selectedTime}. It's officially on the calendar.`;
-  showScreen("thankyou-screen");
-  burstConfetti();
-  setTimeout(burstConfetti, 400);
-}
+/* ================= CONFETTI ================= */
+let confettiRunning = false;
 
-/* =========================================================================
-   CONFETTI (hearts + sparkles + tiny bowling pins)
-   ========================================================================= */
 function burstConfetti() {
+  if (confettiRunning) return;
+  confettiRunning = true;
+
   const canvas = $("#confetti-canvas");
   const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
 
-  const glyphs = ["💜", "✨", "🎳", "💫", "🩷"];
-  const particles = Array.from({ length: 60 }, () => ({
-    x: Math.random() * canvas.width,
-    y: -20 - Math.random() * canvas.height * 0.3,
-    vy: 2 + Math.random() * 3,
-    vx: -1.5 + Math.random() * 3,
-    rotation: Math.random() * 360,
-    rotationSpeed: -6 + Math.random() * 12,
-    size: 14 + Math.random() * 16,
-    glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+
+  const items = ["💜","✨","🎳","💫","🩷"];
+
+  const particles = Array.from({length:50}, () => ({
+    x: Math.random()*canvas.width,
+    y: Math.random()*-200,
+    vx: -1 + Math.random()*2,
+    vy: 2 + Math.random()*3,
     life: 0,
-    maxLife: 140 + Math.random() * 60,
+    max: 120 + Math.random()*40,
+    glyph: items[Math.floor(Math.random()*items.length)],
+    size: 16 + Math.random()*10
   }));
 
-  let frame = 0;
   function animate() {
-    frame += 1;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    let allDone = true;
-    particles.forEach((p) => {
-      if (p.life > p.maxLife) return;
-      allDone = false;
+    let alive = false;
 
+    for (const p of particles) {
+      if (p.life > p.max) continue;
+
+      alive = true;
       p.x += p.vx;
       p.y += p.vy;
-      p.rotation += p.rotationSpeed;
-      p.life += 1;
+      p.life++;
 
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate((p.rotation * Math.PI) / 180);
-      ctx.globalAlpha = Math.max(0, 1 - p.life / p.maxLife);
       ctx.font = `${p.size}px sans-serif`;
-      ctx.textAlign = "center";
-      ctx.fillText(p.glyph, 0, 0);
-      ctx.restore();
-    });
-
-    if (!allDone && frame < 400) {
-      requestAnimationFrame(animate);
-    } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillText(p.glyph, p.x, p.y);
     }
+
+    if (alive) requestAnimationFrame(animate);
+    else confettiRunning = false;
   }
 
-  requestAnimationFrame(animate);
+  animate();
 }
 
-window.addEventListener("resize", () => {
-  const canvas = $("#confetti-canvas");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
-
-/* =========================================================================
-   INIT
-   ========================================================================= */
+/* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded", () => {
   startAmbientLayer();
   initInviteScreen();
