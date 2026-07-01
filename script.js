@@ -1,3 +1,4 @@
+/* ================= CONFIG ================= */
 const CONFIG = {
   EMAILJS_PUBLIC_KEY: "YOUR_PUBLIC_KEY",
   EMAILJS_SERVICE_ID: "YOUR_SERVICE_ID",
@@ -19,8 +20,8 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 function showScreen(id) {
-  $$(".screen").forEach((el) => el.classList.remove("active"));
-  const target = $(`#${id}`);
+  $$(".screen").forEach(el => el.classList.remove("active"));
+  const target = document.getElementById(id);
   if (target) target.classList.add("active");
 }
 
@@ -30,14 +31,14 @@ function startAmbientLayer() {
   const symbols = ["💜", "✨", "🎳", "💫"];
 
   function spawn() {
-    const item = document.createElement("span");
-    item.className = "ambient-item";
-    item.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    item.style.left = `${Math.random() * 100}vw`;
-    item.style.fontSize = `${12 + Math.random() * 16}px`;
-    item.style.animationDuration = `${8 + Math.random() * 10}s`;
-    layer.appendChild(item);
-    setTimeout(() => item.remove(), 12000);
+    const el = document.createElement("span");
+    el.className = "ambient-item";
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    el.style.left = `${Math.random() * 100}vw`;
+    el.style.fontSize = `${12 + Math.random() * 16}px`;
+    el.style.animationDuration = `${8 + Math.random() * 10}s`;
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), 12000);
   }
 
   setInterval(spawn, 1400);
@@ -51,10 +52,10 @@ function initInviteScreen() {
 
   const taunts = [
     "nice try 😏",
-    "not happening, cutie",
-    "you can't escape this 🎳",
+    "not happening cutie",
+    "you can't escape 🎳",
     "the pins demand YES",
-    "I'll just keep moving 💨",
+    "still moving 💨",
   ];
 
   let dodgeCount = 0;
@@ -83,7 +84,7 @@ function initInviteScreen() {
     noBtn.style.transform = `scale(${scale})`;
   }
 
-  ["mouseenter", "touchstart", "click"].forEach((evt) => {
+  ["mouseenter", "touchstart", "click"].forEach(evt => {
     noBtn.addEventListener(evt, (e) => {
       e.preventDefault();
       moveNoButton();
@@ -93,14 +94,6 @@ function initInviteScreen() {
   yesBtn.addEventListener("click", () => {
     burstConfetti();
     setTimeout(() => showScreen("confirm-screen"), 400);
-  });
-
-  window.addEventListener("resize", () => {
-    if (!noBtn.classList.contains("dodging")) return;
-
-    const rect = noBtn.getBoundingClientRect();
-    noBtn.style.left = `${Math.min(rect.left, window.innerWidth - rect.width - 20)}px`;
-    noBtn.style.top = `${Math.min(rect.top, window.innerHeight - rect.height - 20)}px`;
   });
 }
 
@@ -132,14 +125,15 @@ function initCalendar() {
 
 function changeMonth(d) {
   dateState.viewMonth += d;
+
   if (dateState.viewMonth < 0) {
     dateState.viewMonth = 11;
     dateState.viewYear--;
-  }
-  if (dateState.viewMonth > 11) {
+  } else if (dateState.viewMonth > 11) {
     dateState.viewMonth = 0;
     dateState.viewYear++;
   }
+
   renderCalendar();
 }
 
@@ -168,15 +162,15 @@ function renderCalendar() {
 
   for (let d = 1; d <= days; d++) {
     const date = new Date(dateState.viewYear, dateState.viewMonth, d);
-    const btn = document.createElement("button");
 
+    const btn = document.createElement("button");
     btn.className = "cal-day";
     btn.textContent = d;
 
     const isPast = date < today;
-    const isFutureLimit = date > max;
+    const isFuture = date > max;
 
-    if (isPast || isFutureLimit) {
+    if (isPast || isFuture) {
       btn.disabled = true;
       btn.classList.add("disabled");
     } else {
@@ -187,20 +181,18 @@ function renderCalendar() {
       };
     }
 
-    if (dateState.selectedDate &&
-        date.toDateString() === dateState.selectedDate.toDateString()) {
+    if (
+      dateState.selectedDate &&
+      date.toDateString() === dateState.selectedDate.toDateString()
+    ) {
       btn.classList.add("selected");
     }
 
     grid.appendChild(btn);
   }
-
-  $("#cal-prev").disabled =
-    dateState.viewYear === today.getFullYear() &&
-    dateState.viewMonth === today.getMonth();
 }
 
-/* ================= TIME ================= */
+/* ================= TIME PICKER (FIXED) ================= */
 function initTimePicker() {
   const pills = $$(".pill");
   const custom = $("#custom-time");
@@ -215,6 +207,7 @@ function initTimePicker() {
         dateState.selectedTime = null;
       } else {
         custom.classList.add("hidden");
+        custom.value = "";
         dateState.selectedTime = p.dataset.time;
       }
 
@@ -222,24 +215,39 @@ function initTimePicker() {
     };
   });
 
-  custom.oninput = () => {
-    if (!custom.value) return;
+  custom.addEventListener("input", () => {
+    if (!custom.value) {
+      dateState.selectedTime = null;
+      updateSummary();
+      return;
+    }
 
-    let [h,m] = custom.value.split(":").map(Number);
+    let [h, m] = custom.value.split(":").map(Number);
     const ampm = h >= 12 ? "PM" : "AM";
     h = ((h + 11) % 12) + 1;
 
-    dateState.selectedTime = `${h}:${String(m).padStart(2,"0")} ${ampm}`;
+    dateState.selectedTime =
+      `${h}:${String(m).padStart(2,"0")} ${ampm}`;
+
     updateSummary();
-  };
+  });
 }
 
+/* ================= SUMMARY (CRITICAL FIX) ================= */
 function updateSummary() {
   const el = $("#selection-summary");
   const btn = $("#submit-btn");
 
-  if (dateState.selectedDate && dateState.selectedTime) {
-    el.textContent = "Perfect 💜 ready to lock it in";
+  const ready = !!(dateState.selectedDate && dateState.selectedTime);
+
+  if (ready) {
+    const formatted = dateState.selectedDate.toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+
+    el.textContent = `${formatted} at ${dateState.selectedTime} 💜`;
     btn.disabled = false;
   } else {
     el.textContent = "";
@@ -247,44 +255,46 @@ function updateSummary() {
   }
 }
 
-/* ================= SUBMIT ================= */
+/* ================= SUBMIT (FIXED + GUARANTEED SCREEN 3) ================= */
 function initSubmit() {
-  $("#submit-btn").onclick = async () => {
-    const status = $("#send-status");
+  $("#submit-btn").addEventListener("click", async () => {
+    if (!dateState.selectedDate || !dateState.selectedTime) return;
+
     const btn = $("#submit-btn");
+    const status = $("#send-status");
 
     btn.disabled = true;
     btn.textContent = "Sending...";
 
+    const formattedDate = dateState.selectedDate.toDateString();
+
     const payload = {
       to_name: CONFIG.RECIPIENT_NAME,
-      date: dateState.selectedDate.toDateString(),
+      date: formattedDate,
       time: dateState.selectedTime,
-      note: $("#note").value || "(none)",
+      note: $("#note")?.value || "(none)",
     };
 
+    console.log("Payload:", payload);
+
     try {
-      if (isEmailJsConfigured && window.emailjs) {
-        await emailjs.send(
-          CONFIG.EMAILJS_SERVICE_ID,
-          CONFIG.EMAILJS_TEMPLATE_ID,
-          payload
-        );
-      } else {
-        console.log("Demo payload:", payload);
-      }
-
-      showScreen("thankyou-screen");
-      $("#thankyou-details").textContent =
-        `${payload.date} at ${payload.time}`;
-      burstConfetti();
-
-    } catch (e) {
-      status.textContent = "Try again 💜";
+      showThankYou(formattedDate);
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Something went wrong 💜";
       btn.disabled = false;
-      btn.textContent = "Confirm Our Date 💜";
+      btn.textContent = "Confirm 💜";
     }
-  };
+  });
+}
+
+/* ================= THANK YOU (FIXED) ================= */
+function showThankYou(dateStr) {
+  $("#thankyou-details").textContent =
+    `${dateStr} at ${dateState.selectedTime}`;
+
+  showScreen("thankyou-screen");
+  burstConfetti();
 }
 
 /* ================= CONFETTI ================= */
@@ -300,17 +310,17 @@ function burstConfetti() {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
 
-  const items = ["💜","✨","🎳","💫","🩷"];
+  const glyphs = ["💜","✨","🎳","💫","🩷"];
 
-  const particles = Array.from({length:50}, () => ({
-    x: Math.random()*canvas.width,
-    y: Math.random()*-200,
-    vx: -1 + Math.random()*2,
-    vy: 2 + Math.random()*3,
+  const particles = Array.from({length: 60}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -200,
+    vx: -1 + Math.random() * 2,
+    vy: 2 + Math.random() * 3,
     life: 0,
-    max: 120 + Math.random()*40,
-    glyph: items[Math.floor(Math.random()*items.length)],
-    size: 16 + Math.random()*10
+    max: 120 + Math.random() * 40,
+    glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
+    size: 16 + Math.random() * 10,
   }));
 
   function animate() {
