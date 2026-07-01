@@ -51,12 +51,12 @@ function initInviteScreen() {
   const taunt = $("#taunt-text");
 
   const taunts = [
-    "nice try 😏",
-    "not happening cutie",
-    "you can't escape 🎳",
-    "the pins demand YES",
-    "still moving 💨",
-  ];
+  "wait... really? 🥺",
+  "I'm emotionally unwell now",
+  "I'll behave better I promise 😭",
+  "ok this is personal now",
+  "you can't reject me AND my bowling skills",
+];
 
   let dodgeCount = 0;
 
