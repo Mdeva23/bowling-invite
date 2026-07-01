@@ -71,7 +71,7 @@ function initInviteScreen() {
     "aowa bafana... is can't be!!!",
     "I'm emotionally unwell now",
     "I'll behave better I promise 😭",
-    "ok this is personal now",
+    "hebanna this is personal now",
     "you can't reject me",
     "the universe says yes 💫",
     "try again, I dare you",
