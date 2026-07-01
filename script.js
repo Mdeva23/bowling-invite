@@ -79,18 +79,32 @@ function initInviteScreen() {
 
   let dodgeCount = 0;
 
+  // Keeps the button fully inside whatever the current viewport is,
+  // regardless of screen size. Never trust a single calculation — always
+  // clamp the final value between the smallest and largest safe position.
+  function getSafeBounds(rect) {
+    const padding = 20;
+    // Math.max(padding, ...) guards tiny/narrow screens where width/height
+    // could otherwise make the max smaller than the min.
+    const maxX = Math.max(padding, window.innerWidth - rect.width - padding);
+    const maxY = Math.max(padding, window.innerHeight - rect.height - padding);
+    return { padding, maxX, maxY };
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
   function moveNoButton() {
     if (!noBtn.classList.contains("dodging")) {
       noBtn.classList.add("dodging");
     }
 
     const rect = noBtn.getBoundingClientRect();
-    const padding = 20;
-    const maxX = window.innerWidth - rect.width - padding;
-    const maxY = window.innerHeight - rect.height - padding;
+    const { padding, maxX, maxY } = getSafeBounds(rect);
 
-    const x = padding + Math.random() * (maxX - padding);
-    const y = padding + Math.random() * (maxY - padding);
+    const x = clamp(padding + Math.random() * (maxX - padding), padding, maxX);
+    const y = clamp(padding + Math.random() * (maxY - padding), padding, maxY);
 
     noBtn.style.left = `${x}px`;
     noBtn.style.top = `${y}px`;
@@ -101,6 +115,25 @@ function initInviteScreen() {
     const scale = Math.max(0.7, 1 - dodgeCount * 0.02);
     noBtn.style.transform = `scale(${scale})`;
   }
+
+  // If the viewport changes size while the button is off dodging — phone
+  // rotated, mobile address bar showing/hiding, keyboard opening — pull it
+  // back inside the new bounds instead of leaving it stranded off-screen.
+  function reclampNoButton() {
+    if (!noBtn.classList.contains("dodging")) return;
+
+    const rect = noBtn.getBoundingClientRect();
+    const { padding, maxX, maxY } = getSafeBounds(rect);
+
+    const currentX = clamp(rect.left, padding, maxX);
+    const currentY = clamp(rect.top, padding, maxY);
+
+    noBtn.style.left = `${currentX}px`;
+    noBtn.style.top = `${currentY}px`;
+  }
+
+  window.addEventListener("resize", reclampNoButton);
+  window.addEventListener("orientationchange", reclampNoButton);
 
   ["mouseenter", "touchstart", "click"].forEach(evt => {
     noBtn.addEventListener(evt, (e) => {
