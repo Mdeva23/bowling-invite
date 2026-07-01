@@ -28,7 +28,7 @@ function showScreen(id) {
 /* ================= AMBIENT ================= */
 function startAmbientLayer() {
   const layer = $("#ambient-layer");
-  const symbols = ["💜", "✨", "🎳", "💫"];
+  const symbols = ["💜", "✨", "💫", "🌟"];
 
   function spawn() {
     const el = document.createElement("span");
@@ -38,26 +38,44 @@ function startAmbientLayer() {
     el.style.fontSize = `${12 + Math.random() * 16}px`;
     el.style.animationDuration = `${8 + Math.random() * 10}s`;
     layer.appendChild(el);
-    setTimeout(() => el.remove(), 12000);
+    setTimeout(() => el.remove(), 19000);
   }
 
   setInterval(spawn, 1400);
 }
 
-/* ================= SCREEN 1 ================= */
+/* ================= ROTATING DATE-IDEA CAROUSEL ================= */
+// Replaces the old bowling-only ball/pins scene now that the invite covers
+// any kind of date. Icons fade in/out one at a time, staggered by CSS.
+function startIdeaCarousel() {
+  const scene = $("#idea-scene");
+  const ideas = ["🍝", "🎬", "☕", "🎳", "🌅", "💐", "🥂", "🎡"];
+
+  ideas.forEach((icon, i) => {
+    const el = document.createElement("span");
+    el.className = "idea-item";
+    el.textContent = icon;
+    el.style.animationDelay = `${i * (6 / ideas.length)}s`;
+    scene.appendChild(el);
+  });
+}
+
+/* ================= SCREEN 1: THE ASK ================= */
 function initInviteScreen() {
   const noBtn = $("#no-btn");
   const yesBtn = $("#yes-btn");
   const taunt = $("#taunt-text");
 
   const taunts = [
-  "wait... really? 🥺",
-  "aowa bafana... is can't be!!!",
-  "I'm emotionally unwell now",
-  "I'll behave better I promise 😭",
-  "ok this is personal now",
-  "you can't reject me",
-];
+    "wait... really? 🥺",
+    "aowa bafana... is can't be!!!",
+    "I'm emotionally unwell now",
+    "I'll behave better I promise 😭",
+    "ok this is personal now",
+    "you can't reject me",
+    "the universe says yes 💫",
+    "try again, I dare you",
+  ];
 
   let dodgeCount = 0;
 
@@ -67,7 +85,6 @@ function initInviteScreen() {
     }
 
     const rect = noBtn.getBoundingClientRect();
-
     const padding = 20;
     const maxX = window.innerWidth - rect.width - padding;
     const maxY = window.innerHeight - rect.height - padding;
@@ -98,25 +115,59 @@ function initInviteScreen() {
   });
 }
 
-/* ================= CALENDAR ================= */
+/* ================= STATE ================= */
 const dateState = {
   viewYear: null,
   viewMonth: null,
   selectedDate: null,
   selectedTime: null,
+  selectedActivity: null,
 };
 
 const MONTHS = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December"
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
 ];
 
 const MAX_DAYS = 90;
 
+/* ================= ACTIVITY PICKER ================= */
+function initActivityPicker() {
+  const chips = $$("#activity-chips .pill");
+  const customInput = $("#custom-activity");
+
+  chips.forEach(chip => {
+    chip.onclick = () => {
+      chips.forEach(c => c.classList.remove("selected"));
+      chip.classList.add("selected");
+
+      if (chip.dataset.activity === "other") {
+        customInput.classList.remove("hidden");
+        customInput.focus();
+        dateState.selectedActivity = customInput.value.trim() || null;
+      } else {
+        customInput.classList.add("hidden");
+        dateState.selectedActivity = chip.dataset.activity;
+      }
+      updateSummary();
+    };
+  });
+
+  customInput.addEventListener("input", () => {
+    dateState.selectedActivity = customInput.value.trim() || null;
+    updateSummary();
+  });
+}
+
+/* ================= CALENDAR ================= */
 function initCalendar() {
   const today = new Date();
   dateState.viewYear = today.getFullYear();
   dateState.viewMonth = today.getMonth();
+
+  const weekdaysEl = $("#cal-weekdays");
+  weekdaysEl.innerHTML = ["S", "M", "T", "W", "T", "F", "S"]
+    .map(d => `<span>${d}</span>`).join("");
 
   $("#cal-prev").onclick = () => changeMonth(-1);
   $("#cal-next").onclick = () => changeMonth(1);
@@ -126,7 +177,6 @@ function initCalendar() {
 
 function changeMonth(d) {
   dateState.viewMonth += d;
-
   if (dateState.viewMonth < 0) {
     dateState.viewMonth = 11;
     dateState.viewYear--;
@@ -134,7 +184,6 @@ function changeMonth(d) {
     dateState.viewMonth = 0;
     dateState.viewYear++;
   }
-
   renderCalendar();
 }
 
@@ -143,7 +192,7 @@ function renderCalendar() {
   grid.innerHTML = "";
 
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
 
   const max = new Date(today);
   max.setDate(max.getDate() + MAX_DAYS);
@@ -191,11 +240,15 @@ function renderCalendar() {
 
     grid.appendChild(btn);
   }
+
+  const isAtCurrentMonth =
+    dateState.viewYear === today.getFullYear() && dateState.viewMonth === today.getMonth();
+  $("#cal-prev").disabled = isAtCurrentMonth;
 }
 
-/* ================= TIME PICKER (FIXED) ================= */
+/* ================= TIME PICKER ================= */
 function initTimePicker() {
-  const pills = $$(".pill");
+  const pills = $$("#time-pills .pill");
   const custom = $("#custom-time");
 
   pills.forEach(p => {
@@ -227,39 +280,37 @@ function initTimePicker() {
     const ampm = h >= 12 ? "PM" : "AM";
     h = ((h + 11) % 12) + 1;
 
-    dateState.selectedTime =
-      `${h}:${String(m).padStart(2,"0")} ${ampm}`;
-
+    dateState.selectedTime = `${h}:${String(m).padStart(2, "0")} ${ampm}`;
     updateSummary();
   });
 }
 
-/* ================= SUMMARY (CRITICAL FIX) ================= */
+/* ================= SUMMARY ================= */
 function updateSummary() {
   const el = $("#selection-summary");
   const btn = $("#submit-btn");
 
-  const ready = !!(dateState.selectedDate && dateState.selectedTime);
+  const ready = !!(dateState.selectedDate && dateState.selectedTime && dateState.selectedActivity);
 
-  if (ready) {
+  if (dateState.selectedDate && dateState.selectedTime) {
     const formatted = dateState.selectedDate.toLocaleDateString(undefined, {
       weekday: "long",
       month: "long",
       day: "numeric",
     });
-
-    el.textContent = `${formatted} at ${dateState.selectedTime} 💜`;
-    btn.disabled = false;
+    const activityPart = dateState.selectedActivity ? `${dateState.selectedActivity} — ` : "";
+    el.textContent = `${activityPart}${formatted} at ${dateState.selectedTime} 💜`;
   } else {
     el.textContent = "";
-    btn.disabled = true;
   }
+
+  btn.disabled = !ready;
 }
 
-/* ================= SUBMIT (FIXED + GUARANTEED SCREEN 3) ================= */
+/* ================= SUBMIT ================= */
 function initSubmit() {
   $("#submit-btn").addEventListener("click", async () => {
-    if (!dateState.selectedDate || !dateState.selectedTime) return;
+    if (!dateState.selectedDate || !dateState.selectedTime || !dateState.selectedActivity) return;
 
     const btn = $("#submit-btn");
     const status = $("#send-status");
@@ -268,34 +319,122 @@ function initSubmit() {
     btn.textContent = "Sending...";
 
     const formattedDate = dateState.selectedDate.toDateString();
+    const note = $("#note")?.value.trim() || "(none)";
 
     const payload = {
       to_name: CONFIG.RECIPIENT_NAME,
-      date: formattedDate,
-      time: dateState.selectedTime,
-      note: $("#note")?.value || "(none)",
+      activity: dateState.selectedActivity,
+      chosen_date: formattedDate,
+      chosen_time: dateState.selectedTime,
+      note,
     };
 
-    console.log("Payload:", payload);
-
     try {
+      if (isEmailJsConfigured && window.emailjs) {
+        await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, payload);
+      } else {
+        console.info("[Date Invite] EmailJS not configured yet. Selection was:", payload);
+        status.textContent = "(Demo mode: email not sent — see README to enable sending.)";
+      }
       showThankYou(formattedDate);
     } catch (err) {
-      console.error(err);
-      status.textContent = "Something went wrong 💜";
+      console.error("EmailJS send failed:", err);
+      status.textContent = "Hmm, that didn't send. Mind trying again?";
       btn.disabled = false;
-      btn.textContent = "Confirm 💜";
+      btn.textContent = "Confirm Our Date 💜";
     }
   });
 }
 
-/* ================= THANK YOU (FIXED) ================= */
+/* ================= THANK YOU + COUNTDOWN ================= */
+let countdownInterval = null;
+
 function showThankYou(dateStr) {
-  $("#thankyou-details").textContent =
-    `${dateStr} at ${dateState.selectedTime}`;
+  const activity = dateState.selectedActivity;
+  $("#thankyou-details").textContent = `${activity} — ${dateStr} at ${dateState.selectedTime}`;
 
   showScreen("thankyou-screen");
   burstConfetti();
+  startCountdown();
+}
+
+function startCountdown() {
+  const el = $("#thankyou-countdown");
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  const target = buildTargetDate();
+  if (!target) return;
+
+  function tick() {
+    const diff = target - new Date();
+    if (diff <= 0) {
+      el.textContent = "It's today! 🎉";
+      clearInterval(countdownInterval);
+      return;
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const mins = Math.floor((diff / (1000 * 60)) % 60);
+    el.textContent = `⏳ ${days}d ${hours}h ${mins}m to go`;
+  }
+
+  tick();
+  countdownInterval = setInterval(tick, 60000);
+}
+
+// Parses dateState.selectedDate + selectedTime ("4:30 PM") into a real Date object.
+function buildTargetDate() {
+  if (!dateState.selectedDate || !dateState.selectedTime) return null;
+
+  const match = dateState.selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return null;
+
+  let [, hours, minutes, period] = match;
+  hours = parseInt(hours, 10);
+  minutes = parseInt(minutes, 10);
+  if (period.toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (period.toUpperCase() === "AM" && hours === 12) hours = 0;
+
+  const target = new Date(dateState.selectedDate);
+  target.setHours(hours, minutes, 0, 0);
+  return target;
+}
+
+/* ================= ADD TO CALENDAR (.ics) ================= */
+function initIcsButton() {
+  $("#ics-btn").addEventListener("click", () => {
+    const start = buildTargetDate();
+    if (!start) return;
+
+    const end = new Date(start.getTime() + 2 * 60 * 60 * 1000); // default 2hr duration
+    const toIcsDate = (d) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+    const note = $("#note")?.value.trim() || "";
+    const summary = `Date: ${dateState.selectedActivity || "Our Date"}`;
+
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Date Invite//EN",
+      "BEGIN:VEVENT",
+      `DTSTART:${toIcsDate(start)}`,
+      `DTEND:${toIcsDate(end)}`,
+      `SUMMARY:${summary}`,
+      `DESCRIPTION:${note.replace(/\n/g, "\\n")}`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+
+    const blob = new Blob([icsContent], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "our-date.ics";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
 }
 
 /* ================= CONFETTI ================= */
@@ -308,12 +447,12 @@ function burstConfetti() {
   const canvas = $("#confetti-canvas");
   const ctx = canvas.getContext("2d");
 
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  const glyphs = ["💜","✨","🎳","💫","🩷"];
+  const glyphs = ["💜", "✨", "💫", "🩷", "⭐"];
 
-  const particles = Array.from({length: 60}, () => ({
+  const particles = Array.from({ length: 60 }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * -200,
     vx: -1 + Math.random() * 2,
@@ -325,18 +464,15 @@ function burstConfetti() {
   }));
 
   function animate() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     let alive = false;
 
     for (const p of particles) {
       if (p.life > p.max) continue;
-
       alive = true;
       p.x += p.vx;
       p.y += p.vy;
       p.life++;
-
       ctx.font = `${p.size}px sans-serif`;
       ctx.fillText(p.glyph, p.x, p.y);
     }
@@ -348,11 +484,20 @@ function burstConfetti() {
   animate();
 }
 
+window.addEventListener("resize", () => {
+  const canvas = $("#confetti-canvas");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
 /* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded", () => {
   startAmbientLayer();
+  startIdeaCarousel();
   initInviteScreen();
+  initActivityPicker();
   initCalendar();
   initTimePicker();
   initSubmit();
+  initIcsButton();
 });

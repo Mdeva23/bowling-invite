@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-  <title>Will You Go Out With Me? 🎳💜</title>
+  <title>Will You Go Out With Me? 💜</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,14 +13,13 @@
 
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
   <div class="ambient-layer" id="ambient-layer"></div>
 
   <div id="app">
 
-    <!-- SCREEN 1 -->
+    <!-- SCREEN 1: THE ASK -->
     <section id="invite-screen" class="screen active">
       <div class="lane-glow"></div>
 
@@ -32,34 +31,44 @@
         </h1>
       </div>
 
-      <div class="bowling-scene">
-        <div class="pins">
-          <span class="pin">🎳</span>
-          <span class="pin">🎳</span>
-          <span class="pin">🎳</span>
-        </div>
-        <div class="ball">🔮</div>
-      </div>
+      <!-- Rotating carousel of date-idea icons instead of a bowling-only scene -->
+      <div class="idea-scene" id="idea-scene" aria-hidden="true"></div>
 
       <p class="cute-subtext" id="cute-subtext">
-        no pressure... but I already booked the lane in my heart 💜
+        no pressure... but I already cleared my whole week for you 💜
       </p>
 
       <div class="button-row">
-        <button id="yes-btn" class="btn btn-yes">Yes! Let's go 🎳</button>
+        <button id="yes-btn" class="btn btn-yes">Yes! Let's do it 💜</button>
         <button id="no-btn" class="btn btn-no">No</button>
       </div>
 
       <p id="taunt-text" class="taunt-text"></p>
     </section>
 
-    <!-- SCREEN 2 -->
+    <!-- SCREEN 2: THE DETAILS -->
     <section id="confirm-screen" class="screen">
-      <h2 class="section-title">Sensational! 🎉 Pick a date</h2>
-      <p class="section-subtitle">I’ll clear my schedule for you 💜</p>
+      <h2 class="section-title">Yay! 🎉 Let's plan it</h2>
+      <p class="section-subtitle">Pick what sounds fun, then a day and time 💜</p>
 
       <div class="picker-card">
 
+        <!-- Activity picker -->
+        <div class="activity-picker">
+          <h3 class="time-title">What are we feeling?</h3>
+          <div id="activity-chips" class="time-pills">
+            <button class="pill" data-activity="Dinner">🍝 Dinner</button>
+            <button class="pill" data-activity="Movie Night">🎬 Movie Night</button>
+            <button class="pill" data-activity="Coffee">☕ Coffee</button>
+            <button class="pill" data-activity="Bowling">🎳 Bowling</button>
+            <button class="pill" data-activity="Outdoor Adventure">🌅 Outdoor Adventure</button>
+            <button class="pill" data-activity="Surprise Me">🎁 Surprise Me</button>
+            <button class="pill" data-activity="other">✏️ Something Else</button>
+          </div>
+          <input id="custom-activity" type="text" class="custom-time hidden" placeholder="What did you have in mind?" />
+        </div>
+
+        <!-- Calendar -->
         <div class="calendar">
           <div class="calendar-header">
             <button id="cal-prev" class="cal-nav">‹</button>
@@ -71,9 +80,9 @@
           <div id="cal-grid" class="calendar-grid"></div>
         </div>
 
+        <!-- Time -->
         <div class="time-picker">
           <h3 class="time-title">Pick a time</h3>
-
           <div id="time-pills" class="time-pills">
             <button class="pill" data-time="11:00 AM">11:00 AM</button>
             <button class="pill" data-time="2:00 PM">2:00 PM</button>
@@ -82,19 +91,19 @@
             <button class="pill" data-time="9:00 PM">9:00 PM</button>
             <button class="pill" data-time="other">Other ✏️</button>
           </div>
-
           <input id="custom-time" type="time" class="custom-time hidden">
         </div>
 
-        <!-- <div class="note-wrap">
-          <label class="time-title">Note (optional)</label>
-          <textarea id="note" rows="2"></textarea>
-        </div> -->
+        <!-- Optional place / note -->
+        <div class="note-wrap">
+          <label class="time-title" for="note">Anywhere in mind? (optional)</label>
+          <textarea id="note" rows="2" placeholder="A place you'd love to go, or anything I should know..."></textarea>
+        </div>
 
         <p id="selection-summary" class="selection-summary"></p>
 
         <button id="submit-btn" class="btn btn-yes btn-submit" disabled>
-          Confirm 💜
+          Confirm Our Date 💜
         </button>
 
         <p id="send-status" class="send-status"></p>
@@ -102,15 +111,18 @@
       </div>
     </section>
 
-    <!-- SCREEN 3 -->
+    <!-- SCREEN 3: CONFIRMED -->
     <section id="thankyou-screen" class="screen">
       <div class="thankyou-glow"></div>
 
-      <h2 class="section-title">It’s a date! 🎳💜</h2>
+      <h2 class="section-title">It's a date! 💜</h2>
       <p id="thankyou-details" class="thankyou-details"></p>
-      <p class="thankyou-note">Can’t wait 💜</p>
+      <p id="thankyou-countdown" class="thankyou-countdown"></p>
+      <p class="thankyou-note">Can't wait 💜</p>
 
-      <div class="thankyou-emojis">💜 🎳 ✨ 🥂 ✨ 🎳 💜</div>
+      <button id="ics-btn" class="btn btn-yes btn-ics">📅 Add to Calendar</button>
+
+      <div class="thankyou-emojis">💜 ✨ 🥂 ✨ 💜</div>
     </section>
 
   </div>
