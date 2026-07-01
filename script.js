@@ -52,10 +52,11 @@ function initInviteScreen() {
 
   const taunts = [
   "wait... really? 🥺",
+  "aowa bafana... is can't be!!!",
   "I'm emotionally unwell now",
   "I'll behave better I promise 😭",
   "ok this is personal now",
-  "you can't reject me AND my bowling skills",
+  "you can't reject me",
 ];
 
   let dodgeCount = 0;
