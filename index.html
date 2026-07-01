@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Will You Go Out With Me? 💜</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Will You Go Out With Me? 🎳💜</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,76 +16,107 @@
 
 <body>
 
-<div class="ambient-layer" id="ambient-layer"></div>
+  <div class="ambient-layer" id="ambient-layer"></div>
 
-<div id="app">
+  <div id="app">
 
-  <!-- SCREEN 1 -->
-  <section id="invite-screen" class="screen active">
-    <div class="lane-glow"></div>
+    <!-- SCREEN 1 -->
+    <section id="invite-screen" class="screen active">
+      <div class="lane-glow"></div>
 
-    <div class="neon-sign">
-      <h1 class="neon-text">
-        <span>Will you go</span>
-        <span class="neon-highlight">out</span>
-        <span>with me?</span>
-      </h1>
-    </div>
-
-    <div class="bowling-scene">
-      <div class="pins">🎳 🎳 🎳</div>
-      <div class="ball">🔮</div>
-    </div>
-
-    <p class="cute-subtext" id="cute-subtext">no pressure... 💜</p>
-
-    <div class="button-row">
-      <button id="yes-btn" class="btn btn-yes">Yes 💜</button>
-      <button id="no-btn" class="btn btn-no">No</button>
-    </div>
-
-    <p id="taunt-text"></p>
-  </section>
-
-  <!-- SCREEN 2 -->
-  <section id="confirm-screen" class="screen">
-    <h2>Pick a date 💜</h2>
-
-    <div class="calendar">
-      <div>
-        <button id="cal-prev">‹</button>
-        <span id="cal-month-label"></span>
-        <button id="cal-next">›</button>
+      <div class="neon-sign">
+        <h1 class="neon-text">
+          <span>Will you go</span>
+          <span class="neon-highlight">out</span>
+          <span>with me?</span>
+        </h1>
       </div>
 
-      <div id="cal-grid"></div>
-    </div>
+      <div class="bowling-scene">
+        <div class="pins">
+          <span class="pin">🎳</span>
+          <span class="pin">🎳</span>
+          <span class="pin">🎳</span>
+        </div>
+        <div class="ball">🔮</div>
+      </div>
 
-    <div class="time-pills" id="time-pills">
-      <button class="pill" data-time="11:00 AM">11</button>
-      <button class="pill" data-time="2:00 PM">2</button>
-      <button class="pill" data-time="7:00 PM">7</button>
-      <button class="pill" data-time="other">Other</button>
-    </div>
+      <p class="cute-subtext" id="cute-subtext">
+        no pressure... but I already booked the lane in my heart 💜
+      </p>
 
-    <input type="time" id="custom-time" class="hidden"/>
+      <div class="button-row">
+        <button id="yes-btn" class="btn btn-yes">Yes! Let's go 🎳</button>
+        <button id="no-btn" class="btn btn-no">No</button>
+      </div>
 
-    <p id="selection-summary"></p>
+      <p id="taunt-text" class="taunt-text"></p>
+    </section>
 
-    <button id="submit-btn" disabled>Confirm 💜</button>
-    <p id="send-status"></p>
-  </section>
+    <!-- SCREEN 2 -->
+    <section id="confirm-screen" class="screen">
+      <h2 class="section-title">Sensational! 🎉 Pick a date</h2>
+      <p class="section-subtitle">I’ll clear my schedule for you 💜</p>
 
-  <!-- SCREEN 3 -->
-  <section id="thankyou-screen" class="screen">
-    <h2>It’s a date 💜</h2>
-    <p id="thankyou-details"></p>
-  </section>
+      <div class="picker-card">
 
-</div>
+        <div class="calendar">
+          <div class="calendar-header">
+            <button id="cal-prev" class="cal-nav">‹</button>
+            <span id="cal-month-label" class="cal-month-label"></span>
+            <button id="cal-next" class="cal-nav">›</button>
+          </div>
 
-<canvas id="confetti-canvas"></canvas>
+          <div id="cal-weekdays" class="calendar-weekdays"></div>
+          <div id="cal-grid" class="calendar-grid"></div>
+        </div>
 
-<script src="script.js"></script>
+        <div class="time-picker">
+          <h3 class="time-title">Pick a time</h3>
+
+          <div id="time-pills" class="time-pills">
+            <button class="pill" data-time="11:00 AM">11:00 AM</button>
+            <button class="pill" data-time="2:00 PM">2:00 PM</button>
+            <button class="pill" data-time="4:30 PM">4:30 PM</button>
+            <button class="pill" data-time="7:00 PM">7:00 PM</button>
+            <button class="pill" data-time="9:00 PM">9:00 PM</button>
+            <button class="pill" data-time="other">Other ✏️</button>
+          </div>
+
+          <input id="custom-time" type="time" class="custom-time hidden">
+        </div>
+
+        <!-- <div class="note-wrap">
+          <label class="time-title">Note (optional)</label>
+          <textarea id="note" rows="2"></textarea>
+        </div> -->
+
+        <p id="selection-summary" class="selection-summary"></p>
+
+        <button id="submit-btn" class="btn btn-yes btn-submit" disabled>
+          Confirm 💜
+        </button>
+
+        <p id="send-status" class="send-status"></p>
+
+      </div>
+    </section>
+
+    <!-- SCREEN 3 -->
+    <section id="thankyou-screen" class="screen">
+      <div class="thankyou-glow"></div>
+
+      <h2 class="section-title">It’s a date! 🎳💜</h2>
+      <p id="thankyou-details" class="thankyou-details"></p>
+      <p class="thankyou-note">Can’t wait 💜</p>
+
+      <div class="thankyou-emojis">💜 🎳 ✨ 🥂 ✨ 🎳 💜</div>
+    </section>
+
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <script src="script.js"></script>
 </body>
 </html>

@@ -1,69 +1,153 @@
-:root{
-  --bg:#150826;
-  --purple:#7b2ff7;
-  --pink:#ff6fd8;
-  --white:#fff;
+:root {
+  --bg-deep: #150826;
+  --bg-mid: #241041;
+  --purple-primary: #7b2ff7;
+  --purple-light: #b98eff;
+  --pink: #ff6fd8;
+  --gold: #ffd166;
+  --cream: #f7f0ff;
+  --white: #fffaf5;
+
+  --font-display: 'Righteous', cursive;
+  --font-script: 'Parisienne', cursive;
+  --font-body: 'Quicksand', sans-serif;
+
+  --shadow: 0 0 25px rgba(185,142,255,0.4);
 }
 
-*{box-sizing:border-box}
+/* ================= BASE ================= */
+* { box-sizing: border-box; }
 
-body{
-  margin:0;
-  font-family:Quicksand,sans-serif;
-  background:radial-gradient(circle,#2f1457,var(--bg));
-  color:white;
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: radial-gradient(circle at top, #2f1457, var(--bg-deep));
+  color: var(--cream);
+  overflow-x: hidden;
 }
 
-.screen{
-  display:none;
-  text-align:center;
-  padding:20px;
+/* ================= SCREENS ================= */
+#app {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.screen.active{
-  display:block;
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 650px;
+  text-align: center;
+  padding: 24px;
 }
 
-.btn{
-  padding:12px 24px;
-  border-radius:999px;
-  border:none;
-  cursor:pointer;
+.screen.active {
+  display: block;
 }
 
-.btn-yes{
-  background:linear-gradient(45deg,var(--purple),var(--pink));
-  color:white;
+/* ================= BUTTONS ================= */
+.btn {
+  border: none;
+  cursor: pointer;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-weight: 700;
+  transition: 0.2s;
 }
 
-.btn-no.dodging{
-  position:fixed;
+.btn-yes {
+  background: linear-gradient(135deg, var(--purple-primary), var(--pink));
+  color: white;
+  box-shadow: var(--shadow);
 }
 
-/* calendar */
-#cal-grid{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:5px;
+.btn-no {
+  background: transparent;
+  border: 2px solid var(--purple-light);
+  color: var(--purple-light);
+  position: relative;
 }
 
-.cal-day{
-  padding:10px;
-  border-radius:50%;
-  background:transparent;
-  border:none;
-  color:white;
+.btn-no.dodging {
+  position: fixed;
+  z-index: 9999;
 }
 
-.cal-day.selected{
-  background:var(--pink);
+/* ================= INVITE ================= */
+.neon-text {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  text-shadow: 0 0 20px var(--purple-primary);
 }
 
-.hidden{display:none}
+.neon-highlight {
+  color: var(--pink);
+}
 
-/* confetti */
-#confetti-canvas{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
+.button-row {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+/* ================= CALENDAR ================= */
+.calendar-grid,
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.cal-day {
+  padding: 10px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+}
+
+.cal-day.selected {
+  background: var(--pink);
+}
+
+.cal-day.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* ================= TIME ================= */
+.pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--purple-light);
+  background: transparent;
+  color: var(--cream);
+}
+
+.pill.selected {
+  background: var(--purple-primary);
+}
+
+/* ================= UTIL ================= */
+.hidden {
+  display: none;
+}
+
+/* ================= CONFETTI ================= */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ================= THANK YOU ================= */
+.thankyou-glow {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--pink), transparent);
+  margin: auto;
+  filter: blur(20px);
 }
