@@ -71,24 +71,27 @@ function initInviteScreen() {
     "aowa bafana... is can't be!!!",
     "I'm emotionally unwell now",
     "I'll behave better I promise 😭",
-    "hebanna this is personal now",
+    "ok this is personal now",
     "you can't reject me",
     "the universe says yes 💫",
     "try again, I dare you",
   ];
 
   let dodgeCount = 0;
+  let dodgeLoopId = null;
 
-  // Keeps the button fully inside whatever the current viewport is,
-  // regardless of screen size. Never trust a single calculation — always
-  // clamp the final value between the smallest and largest safe position.
-  function getSafeBounds(rect) {
-    const padding = 20;
-    // Math.max(padding, ...) guards tiny/narrow screens where width/height
-    // could otherwise make the max smaller than the min.
-    const maxX = Math.max(padding, window.innerWidth - rect.width - padding);
-    const maxY = Math.max(padding, window.innerHeight - rect.height - padding);
-    return { padding, maxX, maxY };
+  // The most accurate "what's actually visible right now" dimensions.
+  // window.innerWidth/innerHeight can be wrong on mobile (they don't always
+  // account for the address bar showing/hiding), so we prefer
+  // visualViewport when the browser supports it.
+  function getViewportSize() {
+    if (window.visualViewport) {
+      return {
+        width: window.visualViewport.width,
+        height: window.visualViewport.height,
+      };
+    }
+    return { width: window.innerWidth, height: window.innerHeight };
   }
 
   function clamp(value, min, max) {
@@ -98,10 +101,14 @@ function initInviteScreen() {
   function moveNoButton() {
     if (!noBtn.classList.contains("dodging")) {
       noBtn.classList.add("dodging");
+      startDodgeSafetyLoop();
     }
 
     const rect = noBtn.getBoundingClientRect();
-    const { padding, maxX, maxY } = getSafeBounds(rect);
+    const { width: vw, height: vh } = getViewportSize();
+    const padding = 20;
+    const maxX = Math.max(padding, vw - rect.width - padding);
+    const maxY = Math.max(padding, vh - rect.height - padding);
 
     const x = clamp(padding + Math.random() * (maxX - padding), padding, maxX);
     const y = clamp(padding + Math.random() * (maxY - padding), padding, maxY);
@@ -116,24 +123,57 @@ function initInviteScreen() {
     noBtn.style.transform = `scale(${scale})`;
   }
 
-  // If the viewport changes size while the button is off dodging — phone
-  // rotated, mobile address bar showing/hiding, keyboard opening — pull it
-  // back inside the new bounds instead of leaving it stranded off-screen.
-  function reclampNoButton() {
+  // HARD SAFETY NET: once the button starts dodging, this checks its real,
+  // rendered position on every animation frame (~60x/sec) and instantly
+  // snaps it back if any edge is outside the visible screen — regardless
+  // of what caused the drift (transition overshoot, a mobile browser
+  // recalculating its viewport, anything). This makes "leaving the frame"
+  // structurally impossible rather than something we're hoping the math
+  // prevents.
+  function enforceOnScreen() {
     if (!noBtn.classList.contains("dodging")) return;
 
     const rect = noBtn.getBoundingClientRect();
-    const { padding, maxX, maxY } = getSafeBounds(rect);
+    const { width: vw, height: vh } = getViewportSize();
+    const margin = 8;
 
-    const currentX = clamp(rect.left, padding, maxX);
-    const currentY = clamp(rect.top, padding, maxY);
+    let left = rect.left;
+    let top = rect.top;
+    let outOfBounds = false;
 
-    noBtn.style.left = `${currentX}px`;
-    noBtn.style.top = `${currentY}px`;
+    if (rect.left < margin) { left = margin; outOfBounds = true; }
+    if (rect.top < margin) { top = margin; outOfBounds = true; }
+    if (rect.right > vw - margin) { left = Math.max(margin, vw - rect.width - margin); outOfBounds = true; }
+    if (rect.bottom > vh - margin) { top = Math.max(margin, vh - rect.height - margin); outOfBounds = true; }
+
+    if (outOfBounds) {
+      noBtn.style.left = `${left}px`;
+      noBtn.style.top = `${top}px`;
+    }
   }
 
-  window.addEventListener("resize", reclampNoButton);
-  window.addEventListener("orientationchange", reclampNoButton);
+  function startDodgeSafetyLoop() {
+    if (dodgeLoopId) return;
+    function frame() {
+      enforceOnScreen();
+      dodgeLoopId = requestAnimationFrame(frame);
+    }
+    dodgeLoopId = requestAnimationFrame(frame);
+  }
+
+  function stopDodgeSafetyLoop() {
+    if (dodgeLoopId) {
+      cancelAnimationFrame(dodgeLoopId);
+      dodgeLoopId = null;
+    }
+  }
+
+  window.addEventListener("resize", enforceOnScreen);
+  window.addEventListener("orientationchange", enforceOnScreen);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", enforceOnScreen);
+    window.visualViewport.addEventListener("scroll", enforceOnScreen);
+  }
 
   ["mouseenter", "touchstart", "click"].forEach(evt => {
     noBtn.addEventListener(evt, (e) => {
@@ -143,6 +183,7 @@ function initInviteScreen() {
   });
 
   yesBtn.addEventListener("click", () => {
+    stopDodgeSafetyLoop();
     burstConfetti();
     setTimeout(() => showScreen("confirm-screen"), 400);
   });
