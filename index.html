@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Will You Go Bowling With Me? 🎳💜</title>
+  <meta name="description" content="A special invitation just for you." />
+
+  <!-- Google Fonts: Righteous (bold neon-marquee display), Parisienne (romantic script accent), Quicksand (friendly body text) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Parisienne&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- EmailJS SDK (used to send the chosen date/time without needing a backend) -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Ambient floating hearts / sparkles that drift in the background on every screen -->
+  <div class="ambient-layer" id="ambient-layer" aria-hidden="true"></div>
+
+  <div id="app">
+
+    <!-- ===================== SCREEN 1: THE INVITE ===================== -->
+    <section id="invite-screen" class="screen active" aria-live="polite">
+      <div class="lane-glow" aria-hidden="true"></div>
+
+      <div class="neon-sign">
+        <h1 class="neon-text">
+          <span>Will you go</span>
+          <span class="neon-highlight">bowling</span>
+          <span>with me?</span>
+        </h1>
+      </div>
+
+      <!-- Decorative bowling scene: a ball rolls in and knocks the pins -->
+      <div class="bowling-scene" aria-hidden="true">
+        <div class="pins">
+          <span class="pin">🎳</span>
+          <span class="pin">🎳</span>
+          <span class="pin">🎳</span>
+        </div>
+        <div class="ball">🔮</div>
+      </div>
+
+      <p class="cute-subtext" id="cute-subtext">no pressure... but I already booked the lane in my heart 💜</p>
+
+      <div class="button-row">
+        <button id="yes-btn" class="btn btn-yes" type="button">Yes! Let's go 🎳</button>
+        <button id="no-btn" class="btn btn-no" type="button">No</button>
+      </div>
+
+      <p class="taunt-text" id="taunt-text" aria-live="polite"></p>
+    </section>
+
+    <!-- ===================== SCREEN 2: PICK A DATE ===================== -->
+    <section id="confirm-screen" class="screen">
+      <h2 class="section-title">Yay! 🎉 Now pick a day that works for you</h2>
+      <p class="section-subtitle">Strike a pose, strike a pin, strike a date. I'll clear my whole schedule.</p>
+
+      <div class="picker-card">
+
+        <!-- Calendar -->
+        <div class="calendar" id="calendar">
+          <div class="calendar-header">
+            <button type="button" id="cal-prev" class="cal-nav" aria-label="Previous month">‹</button>
+            <span id="cal-month-label" class="cal-month-label"></span>
+            <button type="button" id="cal-next" class="cal-nav" aria-label="Next month">›</button>
+          </div>
+          <div class="calendar-weekdays" id="cal-weekdays"></div>
+          <div class="calendar-grid" id="cal-grid"></div>
+        </div>
+
+        <!-- Time slots -->
+        <div class="time-picker">
+          <h3 class="time-title">Pick a time</h3>
+          <div class="time-pills" id="time-pills">
+            <button type="button" class="pill" data-time="11:00 AM">11:00 AM</button>
+            <button type="button" class="pill" data-time="2:00 PM">2:00 PM</button>
+            <button type="button" class="pill" data-time="4:30 PM">4:30 PM</button>
+            <button type="button" class="pill" data-time="7:00 PM">7:00 PM</button>
+            <button type="button" class="pill" data-time="9:00 PM">9:00 PM</button>
+            <button type="button" class="pill pill-other" id="pill-other" data-time="other">Other ✏️</button>
+          </div>
+          <input type="time" id="custom-time" class="custom-time hidden" aria-label="Custom time" />
+        </div>
+
+        <!-- Optional note -->
+        <div class="note-wrap">
+          <label for="note" class="time-title">A little note (optional)</label>
+          <textarea id="note" rows="2" placeholder="Anything I should know? (shoe size, favorite snack, victory dance requests...)"></textarea>
+        </div>
+
+        <p id="selection-summary" class="selection-summary"></p>
+
+        <button id="submit-btn" class="btn btn-yes btn-submit" type="button" disabled>Confirm Our Date 💜</button>
+        <p id="send-status" class="send-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ===================== SCREEN 3: THANK YOU ===================== -->
+    <section id="thankyou-screen" class="screen">
+      <div class="thankyou-glow" aria-hidden="true"></div>
+      <h2 class="section-title">It's a date! 💜🎳</h2>
+      <p class="thankyou-details" id="thankyou-details"></p>
+      <p class="thankyou-note">I can't wait. Go put on your lucky socks.</p>
+      <div class="thankyou-emojis" aria-hidden="true">💜 🎳 ✨ 🥂 ✨ 🎳 💜</div>
+    </section>
+
+  </div>
+
+  <!-- Confetti canvas overlay (used for the celebration burst) -->
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
