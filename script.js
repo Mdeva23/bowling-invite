@@ -7,9 +7,9 @@ const CONFIG = {
 };
 
 const isEmailJsConfigured =
-  CONFIG.EMAILJS_PUBLIC_KEY !== "DFLM2bR_upkVfeyQb" &&
-  CONFIG.EMAILJS_SERVICE_ID !== "service_3gg87ul" &&
-  CONFIG.EMAILJS_TEMPLATE_ID !== "template_m8k7jya";
+  CONFIG.EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY" &&
+  CONFIG.EMAILJS_SERVICE_ID !== "YOUR_SERVICE_ID" &&
+  CONFIG.EMAILJS_TEMPLATE_ID !== "YOUR_TEMPLATE_ID";
 
 if (isEmailJsConfigured && window.emailjs) {
   emailjs.init({ publicKey: CONFIG.EMAILJS_PUBLIC_KEY });
