@@ -1,15 +1,15 @@
 /* ================= CONFIG ================= */
 const CONFIG = {
-  EMAILJS_PUBLIC_KEY: "YOUR_PUBLIC_KEY",
-  EMAILJS_SERVICE_ID: "YOUR_SERVICE_ID",
-  EMAILJS_TEMPLATE_ID: "YOUR_TEMPLATE_ID",
-  RECIPIENT_NAME: "David",
+  EMAILJS_PUBLIC_KEY: "DFLM2bR_upkVfeyQb",
+  EMAILJS_SERVICE_ID: "service_3gg87ul",
+  EMAILJS_TEMPLATE_ID: "template_m8k7jya",
+  RECIPIENT_NAME: "SSD",
 };
 
 const isEmailJsConfigured =
-  CONFIG.EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY" &&
-  CONFIG.EMAILJS_SERVICE_ID !== "YOUR_SERVICE_ID" &&
-  CONFIG.EMAILJS_TEMPLATE_ID !== "YOUR_TEMPLATE_ID";
+  CONFIG.EMAILJS_PUBLIC_KEY !== "DFLM2bR_upkVfeyQb" &&
+  CONFIG.EMAILJS_SERVICE_ID !== "service_3gg87ul" &&
+  CONFIG.EMAILJS_TEMPLATE_ID !== "template_m8k7jya";
 
 if (isEmailJsConfigured && window.emailjs) {
   emailjs.init({ publicKey: CONFIG.EMAILJS_PUBLIC_KEY });
